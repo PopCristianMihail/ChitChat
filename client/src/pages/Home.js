@@ -1,6 +1,11 @@
 import { React, useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getUsersRoute, host, deleteConversationRoute } from "../ServerRoutes";
+import {
+  getUsersRoute,
+  host,
+  deleteConversationRoute,
+  followUserRoute,
+} from "../ServerRoutes";
 import axios from "axios";
 import { io } from "socket.io-client";
 import "../styles.scss";
@@ -32,7 +37,9 @@ const Home = () => {
   useEffect(() => {
     if (currentUser) {
       socket.current = io(host);
-      socket.current.emit("join", currentUser._id);
+
+      // FIXME: send the user object without the profile picture
+      socket.current.emit("join", currentUser);
     }
   }, [currentUser]);
 
@@ -44,7 +51,13 @@ const Home = () => {
     fetchContacts();
   }, [currentUser]);
 
-  const handleChange = (chat) => {
+  const handleChange = async (chat) => {
+    const currentUser = JSON.parse(sessionStorage.getItem("ChitChatUser"));
+    const data = { userId: currentUser._id, followerId: chat._id };
+    await axios.put(followUserRoute, data).catch((err) => {
+      console.log(err);
+    });
+    socket.current?.emit("updateFollower", data);
     setSelectedContact(chat);
   };
 

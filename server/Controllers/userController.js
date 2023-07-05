@@ -70,8 +70,33 @@ module.exports.getUsers = async (req, res) => {
   try {
     const users = await User.find({
       _id: { $ne: req.params.id },
-    }).select(["email", "username", "profilePicture", "_id"]);
+    }).select(["email", "username", "profilePicture", "follower", "_id"]);
     return res.json(users);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+module.exports.getFollower = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.sendStatus(404);
+
+    return res.json({ id: user.follower?.toString() ?? null });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+module.exports.followUser = async (req, res) => {
+  try {
+    const { userId, followerId } = req.body;
+    if (!userId) return res.sendStatus(400);
+
+    await User.findByIdAndUpdate(userId, {
+      follower: followerId ?? null,
+    });
+    res.sendStatus(200);
   } catch (err) {
     console.log(err);
   }

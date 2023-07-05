@@ -39,23 +39,39 @@ const socket = io(server, {
   },
 });
 
-let users = [];
+// In a production ready app, we would use Redis to store the users array
+let userPool = [];
 
 socket.on("connection", (socket) => {
-  socket.on("join", (userId) => {
-    users.push({ userId, socketId: socket.id });
+  socket.on("join", (user) => {
+    userPool.push({
+      userId: user._id,
+      followerId: user.followerId,
+      socketId: socket.id,
+    });
   });
-  socket.on("sendMessage", (data) => {
-    const receiver = users.find((user) => user.userId === data.receiver);
+  socket.on("updateFollower", (currentUser) => {
+    for (let i = 0; i < userPool.length; i++) {
+      if (userPool[i].userId === currentUser.userId) {
+        userPool[i].followerId = currentUser.followerId;
+      }
+    }
+  });
+  socket.on("sendMessage", (currentUser) => {
+    // The handshake
+    //
+    // The receiver is computed by finding the user
+    // in the user pool, whose follower is the sender
+    const receiver = userPool.find(
+      (user) => user.followerId === currentUser.sender
+    );
     if (receiver) {
       socket.to(receiver.socketId).emit("getMessage", {
-        message: data.message,
-        sender: data.sender,
-        receiver: data.receiver,
+        message: currentUser.message,
       });
     }
   });
   socket.on("disconnect", () => {
-    users = users.filter((user) => user.socketId !== socket.id);
+    userPool = userPool.filter((user) => user.socketId !== socket.id);
   });
 });

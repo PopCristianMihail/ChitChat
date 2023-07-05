@@ -1,7 +1,7 @@
 import React from "react";
 import Input from "./Input";
 import axios from "axios";
-import { getMessagesRoute } from "../ServerRoutes";
+import { getMessagesRoute, getFollowerRoute } from "../ServerRoutes";
 import { useEffect, useState } from "react";
 import { sendMessageRoute } from "../ServerRoutes";
 import { v4 as uuidv4 } from "uuid";
@@ -29,14 +29,21 @@ const Messages = ({ selectedContact, socket }) => {
     const currentUser = await JSON.parse(
       sessionStorage.getItem("ChitChatUser")
     );
+    const followerIdResponse = await axios
+      .get(`${getFollowerRoute}/${currentUser._id}`)
+      .catch((err) => {
+        console.log(err);
+        return null;
+      });
+    const followerId = followerIdResponse?.data?.id;
     socket.current.emit("sendMessage", {
       sender: currentUser._id,
-      receiver: selectedContact._id,
+      receiver: followerId,
       message: mess,
     });
     await axios.post(sendMessageRoute, {
       sender: currentUser._id,
-      receiver: selectedContact._id,
+      receiver: followerId,
       message: mess,
     });
     setMessages([
@@ -51,15 +58,7 @@ const Messages = ({ selectedContact, socket }) => {
   useEffect(() => {
     (async () => {
       if (socket.current) {
-        const currentUser = await JSON.parse(
-          sessionStorage.getItem("ChitChatUser")
-        );
         socket.current.on("getMessage", (data) => {
-          if (
-            data.sender !== selectedContact._id ||
-            data.receiver !== currentUser._id
-          )
-            return;
           setLastMessage({ fromCurrentUser: false, message: data.message });
         });
       }
