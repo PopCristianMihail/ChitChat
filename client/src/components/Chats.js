@@ -1,11 +1,26 @@
 import React from "react";
 import { useState, useEffect } from "react";
 
+import { Suspense } from '.';
+
+const Contact = ({ className, onContactChange, contact }) => ( 
+  <div
+    key={contact._id}
+    className={className}
+    onClick={() => onContactChange(contact)}
+  >
+    <img src={contact.profilePicture} alt="" />
+    <div className="userChatInfo">
+      <span>{contact.username}</span>
+    </div>
+  </div>
+)
+
 const Chats = ({ contacts, changeCurrentSelectedContact }) => {
   const [currentContact, setCurrentContact] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleContactChange = (index, contact) => {
+  const handleContactChange = index => contact => {
     setCurrentContact(index);
     changeCurrentSelectedContact(contact);
   };
@@ -18,45 +33,34 @@ const Chats = ({ contacts, changeCurrentSelectedContact }) => {
   };
 
   useEffect(() => {
+    if (contacts.length > 0) setIsLoading(false);
+  }, [contacts]);
+
+  useEffect(() => {
     document.addEventListener("keydown", escPressed, false);
     return () => {
       document.removeEventListener("keydown", escPressed, false);
     };
   });
 
-  useEffect(() => {
-    if (contacts.length > 0) {
-      setIsLoading(false);
-    }
-  }, [contacts]);
-
-  const renderContacts = () => {
-    return contacts.map((contact, index) => {
-      return (
-        <div
-          key={contact._id}
-          className={`userChat ${index === currentContact ? "active" : ""}`}
-          onClick={() => handleContactChange(index, contact)}
-        >
-          <img src={contact.profilePicture} alt="" />
-          <div className="userChatInfo">
-            <span>{contact.username}</span>
-          </div>
-        </div>
-      );
-    });
-  };
 
   return (
-    <>
-      {isLoading ? (
+    <Suspense loading={isLoading} fallback={() => (
         <div className="chatsContainer onLoading">
           <span className="loader"></span>
         </div>
-      ) : (
-        <div className="chatsContainer">{renderContacts()}</div>
-      )}
-    </>
+    )}>
+      <div className="chatsContainer">{
+        contacts.map((contact, index) => (
+          <Contact
+            contact={contact}
+            key={index}
+            className={`userChat ${index === currentContact ? "active" : ""}`}
+            onContactChange={handleContactChange(index)}
+          />
+        ))}
+      </div>
+    </Suspense>
   );
 };
 

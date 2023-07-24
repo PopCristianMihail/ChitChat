@@ -1,100 +1,84 @@
 import { React, useState, useEffect, useRef } from "react";
+
 import { useNavigate } from "react-router-dom";
-import {
-  getUsersRoute,
-  host,
-  deleteConversationRoute,
-  followUserRoute,
-} from "../ServerRoutes";
+
 import axios from "axios";
 import { io } from "socket.io-client";
-import "../styles.scss";
-import Navbar from "../components/Navbar";
-import Chats from "../components/Chats";
+
+import { getUsersRoute, host, deleteConversationRoute } from "../ServerRoutes";
+
+import { Navbar, Chats, Messages } from "../components";
 import Bin from "../images/bin.png";
-import Messages from "../components/Messages";
+
+import "../styles.scss";
+
+const ChatInfo = ({ username, profilePicture, onDeleteConversation }) => {
+  if (!username) return <div className="chatInfo noChatSelected" />;
+
+  return (
+    <div className="chatInfo">
+      <span>
+        <img src={profilePicture} alt="" />
+        {username}
+      </span>
+      <div className="chatIcons">
+        <img src={Bin} alt="" onClick={onDeleteConversation} />
+      </div>
+    </div>
+  )
+}
 
 const Home = () => {
+  const navigate = useNavigate();
+
   const socket = useRef();
+
   const [contacts, setContacts] = useState([]);
   const [selectedContact, setSelectedContact] = useState({});
   const [currentUser, setCurrentUser] = useState({});
-  const navigate = useNavigate();
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      if (!sessionStorage.getItem("ChitChatUser")) {
-        navigate("/login");
-      } else {
-        const user = await JSON.parse(sessionStorage.getItem("ChitChatUser"));
-        setCurrentUser(user);
-      }
-    };
-    fetchCurrentUser();
-  }, [navigate]);
-
-  //useRef for socket
-
-  useEffect(() => {
-    if (currentUser) {
-      socket.current = io(host);
-
-      // FIXME: send the user object without the profile picture
-      socket.current.emit("join", currentUser);
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
-    const fetchContacts = async () => {
-      const response = await axios.get(`${getUsersRoute}/${currentUser._id}`);
-      setContacts(response.data);
-    };
-    fetchContacts();
-  }, [currentUser]);
 
   const handleChange = async (chat) => {
-    const currentUser = JSON.parse(sessionStorage.getItem("ChitChatUser"));
-    const data = { userId: currentUser._id, followerId: chat._id };
-    await axios.put(followUserRoute, data).catch((err) => {
-      console.log(err);
-    });
-    socket.current?.emit("updateFollower", data);
     setSelectedContact(chat);
   };
 
-  const handleDeleteConversationButton = async () => {
-    const answer = window.confirm(
-      "Are you sure you want to delete this conversation?"
-    );
-    if (answer === true) {
-      const response = await axios.post(`${deleteConversationRoute}`, {
-        sender: currentUser._id,
-        receiver: selectedContact._id,
-      });
-      if (response.data.status) {
-        setSelectedContact({});
-      }
-    } else {
-      return;
-    }
+  const handleDeleteConversation = async () => {
+    const answer = window.confirm("Are you sure you want to delete this conversation?");
+    if (!answer) return;
+     
+    const response = await axios.post(`${deleteConversationRoute}`, {
+      sender: currentUser._id,
+      receiver: selectedContact._id,
+    });
+
+    if (response.data.status) setSelectedContact({});
   };
 
-  const chatInfoHandler = () => {
-    if (selectedContact.username) {
-      return (
-        <div className="chatInfo">
-          <span>
-            <img src={selectedContact.profilePicture} alt="" />
-            {selectedContact.username}
-          </span>
-          <div className="chatIcons">
-            <img src={Bin} alt="" onClick={handleDeleteConversationButton} />
-          </div>
-        </div>
-      );
-    } else {
-      return <div className="chatInfo noChatSelected"></div>;
-    }
-  };
+  useEffect(() => {
+    if (!currentUser) return;
+  
+    socket.current = io(host);
+
+    // FIXME: send the user object without the profile picture
+    socket.current.emit("join", currentUser);
+  }, [currentUser]);
+
+  useEffect(() => {
+    (async () => {
+      const response = await axios.get(`${getUsersRoute}/${currentUser._id}`);
+      setContacts(response.data);
+    })();
+  }, [currentUser]);
+
+  useEffect(() => {
+    (async () => {
+      if (!sessionStorage.getItem("ChitChatUser")) {
+        navigate("/login"); 
+        return;
+      }
+      
+      setCurrentUser(JSON.parse(sessionStorage.getItem("ChitChatUser")));
+    })();
+  }, [navigate]);
 
   return (
     <div className="home">
@@ -109,8 +93,15 @@ const Home = () => {
         <div
           className={`chat ${selectedContact.username ? "" : "noChatSelected"}`}
         >
-          {chatInfoHandler()}
-          <Messages selectedContact={selectedContact} socket={socket} />
+          <ChatInfo
+            username={selectedContact.username}
+            profilePicture={selectedContact.profilePicture}
+            onDeleteConversation={handleDeleteConversation}
+          />
+          <Messages
+            selectedContact={selectedContact}
+            socket={socket}
+          />
         </div>
       </div>
     </div>

@@ -77,31 +77,6 @@ module.exports.getUsers = async (req, res) => {
   }
 };
 
-module.exports.getFollower = async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) return res.sendStatus(404);
-
-    return res.json({ id: user.follower?.toString() ?? null });
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-module.exports.followUser = async (req, res) => {
-  try {
-    const { userId, followerId } = req.body;
-    if (!userId) return res.sendStatus(400);
-
-    await User.findByIdAndUpdate(userId, {
-      follower: followerId ?? null,
-    });
-    res.sendStatus(200);
-  } catch (err) {
-    console.log(err);
-  }
-};
-
 module.exports.logOut = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);

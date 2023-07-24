@@ -1,9 +1,8 @@
-import Register from "./pages/Register";
-import Login from "./pages/Login";
-import Home from "./pages/Home";
-import "./styles.scss";
 import { Routes, Route, BrowserRouter } from "react-router-dom";
-import ChooseProfilePicture from "./pages/ChooseProfilePicture";
+
+import { Home, Login, Register, ChooseProfilePicture } from './pages';
+
+import "./styles.scss";
 
 function App() {
   return (

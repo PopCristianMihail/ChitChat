@@ -1,59 +1,55 @@
-import React from "react";
+import React, { useRef } from "react";
+
 import Input from "./Input";
+
 import axios from "axios";
-import { getMessagesRoute, getFollowerRoute } from "../ServerRoutes";
+
+import { getMessagesRoute, sendMessageRoute } from "../ServerRoutes";
+
 import { useEffect, useState } from "react";
-import { sendMessageRoute } from "../ServerRoutes";
+
 import { v4 as uuidv4 } from "uuid";
-import { useRef } from "react";
+
 
 const Messages = ({ selectedContact, socket }) => {
   const [messages, setMessages] = useState([]);
   const [lastMessage, setLastMessage] = useState(null);
   const scrollRef = useRef();
-  useEffect(() => {
-    const fetchMessages = async () => {
-      const currentUser = await JSON.parse(
-        sessionStorage.getItem("ChitChatUser")
+  
+  
+  const handleSendMessage = async (mess) => {
+    const currentUser = JSON.parse(
+      sessionStorage.getItem("ChitChatUser")
       );
-      const response = await axios.post(getMessagesRoute, {
+      socket.current.emit("sendMessage", {
         sender: currentUser._id,
         receiver: selectedContact._id,
-      });
-      setMessages(response.data);
-    };
-    fetchMessages();
-  }, [selectedContact._id]);
-
-  const handleSendMessage = async (mess) => {
-    const currentUser = await JSON.parse(
-      sessionStorage.getItem("ChitChatUser")
-    );
-    const followerIdResponse = await axios
-      .get(`${getFollowerRoute}/${currentUser._id}`)
-      .catch((err) => {
-        console.log(err);
-        return null;
-      });
-    const followerId = followerIdResponse?.data?.id;
-    socket.current.emit("sendMessage", {
-      sender: currentUser._id,
-      receiver: followerId,
-      message: mess,
-    });
-    await axios.post(sendMessageRoute, {
-      sender: currentUser._id,
-      receiver: followerId,
-      message: mess,
-    });
-    setMessages([
-      ...messages,
-      {
-        fromCurrentUser: true,
         message: mess,
-      },
-    ]);
-  };
+      });
+      await axios.post(sendMessageRoute, {
+        sender: currentUser._id,
+        receiver: selectedContact._id,
+        message: mess,
+      });
+      setMessages([
+        ...messages,
+        {
+          fromCurrentUser: true,
+          message: mess,
+        },
+      ]);
+    };
+    
+  useEffect(() => {
+      (async () => {
+        const currentUser = JSON.parse(sessionStorage.getItem("ChitChatUser"));
+        const response = await axios.post(getMessagesRoute, {
+          sender: currentUser._id,
+          receiver: selectedContact._id,
+        });
+        setMessages(response.data);
+      })();
+    }, [selectedContact._id]);
 
   useEffect(() => {
     (async () => {
