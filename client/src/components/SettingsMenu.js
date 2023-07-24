@@ -4,6 +4,7 @@ import {
   logOutRoute,
   changeProfilePictureRoute,
   changeUsernameRoute,
+  deleteAccountRoute,
 } from "../ServerRoutes";
 import imageCompression from "browser-image-compression";
 
@@ -95,6 +96,21 @@ function SettingsMenu({ isOpen, currentUser }) {
     }
   };
 
+  const handleDeleteAccount = () => {
+    const answer = window.confirm(
+      "Are you sure you want to permanently delete yout account ?"
+    );
+    if (answer === true){
+      axios.post(`${deleteAccountRoute}/${currentUser._id}`).then((res) => {
+        sessionStorage.removeItem("ChitChatUser");
+        window.location.reload();
+      }
+      ).catch((err) => {
+        console.log(err);
+      });
+    }
+  }
+
   return (
     <>
       <div className={`dropDownMenuContainer ${isOpen ? "active" : ""}`}>
@@ -123,6 +139,9 @@ function SettingsMenu({ isOpen, currentUser }) {
               <span className="loader"></span>
             </li>
           )}
+          <li className="dropDownMenuOption" onClick={handleDeleteAccount}>
+            Delete Account
+          </li>
         </ul>
       </div>
     </>

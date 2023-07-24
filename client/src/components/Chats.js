@@ -2,7 +2,7 @@ import React from "react";
 import { useState, useEffect } from "react";
 
 const Chats = ({ contacts, changeCurrentSelectedContact }) => {
-  const [currentContact, setCurrentContact] = useState(undefined);
+  const [currentContact, setCurrentContact] = useState({});
   const [isLoading, setIsLoading] = useState(true);
 
   const handleContactChange = (index, contact) => {

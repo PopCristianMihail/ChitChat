@@ -2,8 +2,6 @@ const Message = require("../Models/messageModel");
 
 module.exports.sendMessage = async (req, res) => {
   try {
-    if (!req.body.receiver) return res.sendStatus(400);
-
     const response = await Message.create({
       message: {
         text: req.body.message,

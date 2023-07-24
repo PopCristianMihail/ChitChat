@@ -4,7 +4,6 @@ import {
   getUsersRoute,
   host,
   deleteConversationRoute,
-  followUserRoute,
 } from "../ServerRoutes";
 import axios from "axios";
 import { io } from "socket.io-client";
@@ -21,16 +20,13 @@ const Home = () => {
   const [currentUser, setCurrentUser] = useState({});
   const navigate = useNavigate();
   useEffect(() => {
-    const fetchCurrentUser = async () => {
       if (!sessionStorage.getItem("ChitChatUser")) {
         navigate("/login");
       } else {
-        const user = await JSON.parse(sessionStorage.getItem("ChitChatUser"));
+        const user = JSON.parse(sessionStorage.getItem("ChitChatUser"));
         setCurrentUser(user);
       }
-    };
-    fetchCurrentUser();
-  }, [navigate]);
+  },[navigate]);
 
   //useRef for socket
 
@@ -38,8 +34,8 @@ const Home = () => {
     if (currentUser) {
       socket.current = io(host);
 
-      // FIXME: send the user object without the profile picture
-      socket.current.emit("join", currentUser);
+      // ! Fix this : send the user object without the profile picture
+      socket.current.emit("join", currentUser._id);
     }
   }, [currentUser]);
 
@@ -51,13 +47,7 @@ const Home = () => {
     fetchContacts();
   }, [currentUser]);
 
-  const handleChange = async (chat) => {
-    const currentUser = JSON.parse(sessionStorage.getItem("ChitChatUser"));
-    const data = { userId: currentUser._id, followerId: chat._id };
-    await axios.put(followUserRoute, data).catch((err) => {
-      console.log(err);
-    });
-    socket.current?.emit("updateFollower", data);
+  const handleChange = (chat) => {
     setSelectedContact(chat);
   };
 

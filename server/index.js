@@ -34,44 +34,24 @@ const server = app.listen(4000, () => {
 
 const socket = io(server, {
   cors: {
-    origin: "http://192.168.100.104:3000",
+    origin: "http://localhost:3000",
     credentials: true,
   },
 });
 
-// In a production ready app, we would use Redis to store the users array
-let userPool = [];
+global.onlineUsers = new Map();
 
 socket.on("connection", (socket) => {
-  socket.on("join", (user) => {
-    userPool.push({
-      userId: user._id,
-      followerId: user.followerId,
-      socketId: socket.id,
-    });
+  console.log("a user connected");
+  global.chatSocket = socket;
+  socket.on("join", (userId) => {
+    onlineUsers.set(userId, socket.id);
   });
-  socket.on("updateFollower", (currentUser) => {
-    for (let i = 0; i < userPool.length; i++) {
-      if (userPool[i].userId === currentUser.userId) {
-        userPool[i].followerId = currentUser.followerId;
-      }
+  socket.on("sendMessage", (data) => {
+    const receiverId = onlineUsers.get(data.receiver);
+    if (receiverId) {
+      socket.to(receiverId).emit("getMessage", data.message);
     }
   });
-  socket.on("sendMessage", (currentUser) => {
-    // The handshake
-    //
-    // The receiver is computed by finding the user
-    // in the user pool, whose follower is the sender
-    const receiver = userPool.find(
-      (user) => user.followerId === currentUser.sender
-    );
-    if (receiver) {
-      socket.to(receiver.socketId).emit("getMessage", {
-        message: currentUser.message,
-      });
-    }
-  });
-  socket.on("disconnect", () => {
-    userPool = userPool.filter((user) => user.socketId !== socket.id);
-  });
-});
+}
+);
