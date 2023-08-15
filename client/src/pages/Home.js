@@ -8,7 +8,7 @@ import { io } from "socket.io-client";
 import { getUsersRoute, host, deleteConversationRoute } from "../ServerRoutes";
 
 import { Navbar, Chats, Messages } from "../components";
-import Bin from "../images/bin.png";
+import BinImage from "../images/bin.png";
 
 import "../styles.scss";
 
@@ -22,7 +22,7 @@ const ChatInfo = ({ username, profilePicture, onDeleteConversation }) => {
         {username}
       </span>
       <div className="chatIcons">
-        <img src={Bin} alt="" onClick={onDeleteConversation} />
+        <img src={BinImage} alt="" onClick={onDeleteConversation} />
       </div>
     </div>
   )

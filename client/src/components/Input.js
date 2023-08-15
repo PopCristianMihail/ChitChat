@@ -10,25 +10,18 @@ const Input = ({ handleSendMessage }) => {
   const [message, setMessage] = useState("");
   const [showPicker, setShowPicker] = useState(false);
   const inputPicture = useRef(null);
-  const handleChange = (e) => {
-    setMessage(e.target.value);
-  };
+
+  const handleChange = (e) => setMessage(e.target.value);
 
   const handleSend = (e) => {
     e.preventDefault();
-    if (message.trim().length > 0) {
-      setMessage(message);
-      handleSendMessage(message);
-      setMessage("");
-    } else {
-      setMessage("");
-    }
+
+    if (message.trim().length > 0) handleSendMessage(message); 
+    setMessage("");
   };
 
   const handleEnterKeyPressed = (e) => {
-    if (e.key === "Enter") {
-      handleSend(e);
-    }
+    if (e.key === "Enter") handleSend(e);
   };
 
   const handlePickerClick = () => {
@@ -36,27 +29,22 @@ const Input = ({ handleSendMessage }) => {
     console.log(showPicker);
   };
 
-  const handleSendPictureClick = () => {
-    inputPicture.current.click();
-    inputPicture.current.onchange = async () => {
-      if (inputPicture.current.files.length === 0) {
-        // in case someone cancels the file browser
-      } else {
-        const file = inputPicture.current.files[0];
-        const options = {
-          maxSizeMB: 1,
-          maxWidthOrHeight: 1920,
-          useWebWorker: true,
-        };
-        const compressedFile = await imageCompression(file, options);
-        const reader = new FileReader();
-        reader.readAsDataURL(compressedFile);
-        reader.onloadend = async () => {
-          handleSendMessage(reader.result);
-        };
-      }
+  const handlePictureChange = async () => {
+    if (inputPicture.current.files.length === 0) return; 
+
+    const file = inputPicture.current.files[0];
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
     };
+    const compressedFile = await imageCompression(file, options);
+    const reader = new FileReader();
+    reader.readAsDataURL(compressedFile);
+    reader.onloadend = async () => handleSendMessage(reader.result);
   };
+
+  const handleSendPictureClick = () => inputPicture.current.click();;
 
   return (
     <div className="input">
@@ -91,6 +79,7 @@ const Input = ({ handleSendMessage }) => {
           style={{ display: "none" }}
           accept="image/*"
           ref={inputPicture}
+          onChange={handlePictureChange}
         />
       </div>
     </div>
