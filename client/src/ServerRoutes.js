@@ -1,4 +1,4 @@
-export const host = "http://192.168.100.104:4000";
+export const host = "http://localhost:4000";
 export const registerRoute = `${host}/server/authentication/register`;
 export const loginRoute = `${host}/server/authentication/login`;
 export const profilePictureRoute = `${host}/server/authentication/profilePicture`;

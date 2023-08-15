@@ -57,9 +57,7 @@ const Home = () => {
     if (!currentUser) return;
   
     socket.current = io(host);
-
-    // FIXME: send the user object without the profile picture
-    socket.current.emit("join", currentUser);
+    socket.current.emit("join", currentUser._id);
   }, [currentUser]);
 
   useEffect(() => {

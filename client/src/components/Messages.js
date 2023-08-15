@@ -43,24 +43,34 @@ const Messages = ({ selectedContact, socket }) => {
   };
     
   useEffect(() => {
+    const abortController = new AbortController();
     (async () => {
       const currentUser = JSON.parse(sessionStorage.getItem("ChitChatUser"));
       const response = await axios.post(getMessagesRoute, {
         sender: currentUser._id,
         receiver: selectedContact._id,
-      });
-      setMessages(response.data);
+      }, { signal: abortController.signal });
+      if (response.data) {
+        setMessages(response.data);
+      }
     })();
+    return () => {
+      abortController.abort();
+    }
   }, [selectedContact._id]);
 
   useEffect(() => {
-    (async () => {
-      if (!socket.current) return;
-      
-      socket.current.on("getMessage", ({ message }) => {
-        setLastMessage({ fromCurrentUser: false, message });
-      });
-    })();
+    if (!socket.current) return;
+    
+    const currSocket = socket.current;
+    currSocket.on("getMessage", ({ sender, message }) => {
+      if (sender !== selectedContact._id) return;
+
+      setLastMessage({ fromCurrentUser: false, message });
+    });
+    return () => {
+      currSocket.off("getMessage");
+    }
   });
 
   useEffect(() => {

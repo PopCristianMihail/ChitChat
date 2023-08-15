@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 import { Suspense } from '.';
 
@@ -19,17 +19,17 @@ const Chats = ({ contacts, changeCurrentSelectedContact }) => {
   const [currentContact, setCurrentContact] = useState(undefined);
   const [isLoading, setIsLoading] = useState(true);
 
-  const handleContactChange = useCallback(index => contact => {
+  const handleContactChange = index => contact => {
     setCurrentContact(index);
     changeCurrentSelectedContact(contact);
-  }, [changeCurrentSelectedContact]);
+  };
 
-  const escPressed = useCallback((e) => {
+  const escPressed = (e) => {
     if (e.keyCode === 27) {
       handleContactChange({}, {});
       setCurrentContact(undefined);
     }
-  }, [handleContactChange]);
+  };
 
   useEffect(() => {
     if (contacts.length > 0) setIsLoading(false);

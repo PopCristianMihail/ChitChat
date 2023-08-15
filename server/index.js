@@ -6,6 +6,9 @@ const morgan = require("morgan");
 const io = require("socket.io");
 const userRoute = require("./Routes/userRoute");
 const messageRoute = require("./Routes/messageRoute");
+
+const { createSocketOperations } = require("./Socket");
+
 const app = express();
 
 dotenv.config();
@@ -38,8 +41,14 @@ const server = app.listen(4000, () => {
 
 const socket = io(server, {
   cors: {
-    origin: "http://192.168.100.104:3000",
+    origin: "http://localhost:3000",
     credentials: true,
   },
 });
 
+const { join, disconnect, sendMessage } = createSocketOperations();
+socket.on("connection", (socket) => {
+  socket.on("join", join(socket));
+  socket.on("disconnect", disconnect);
+  socket.on("sendMessage", sendMessage(socket));
+});
