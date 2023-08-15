@@ -13,59 +13,59 @@ function SettingsMenu({ isOpen, currentUser }) {
 
   const handleLogOut = async () => {
     setIsLoading(true);
+
     const user = await JSON.parse(sessionStorage.getItem("ChitChatUser"));
     const id = user._id;
     const response = await axios.get(`${logOutRoute}/${id}`);
+
     if (response.status) {
       sessionStorage.removeItem("ChitChatUser");
       window.location.reload();
     }
   };
 
-  const handleProfilePictureChange = () => {
-    inputFile.current.click();
-    inputFile.current.onchange = async () => {
-      if (inputFile.current.files.length === 0) {
-        // in case someone cancels the file browser
-      } else {
-        const file = inputFile.current.files[0];
-        const options = {
-          maxSizeMB: 1,
-          maxWidthOrHeight: 1920,
-          useWebWorker: true,
-        };
-        const compressedFile = await imageCompression(file, options);
-        const reader = new FileReader();
-        reader.readAsDataURL(compressedFile);
-        reader.onloadend = async () => {
-          await axios
-            .post(`${changeProfilePictureRoute}/${currentUser._id}`, {
-              profilePicture: reader.result,
-              id: currentUser._id,
-            })
-            .then((res) => {
-              const response = res.data;
-              if (response.isSet) {
-                currentUser.profilePicture = reader.result;
-                sessionStorage.setItem(
-                  "ChitChatUser",
-                  JSON.stringify(currentUser)
-                );
-                window.location.reload();
-              }
-            });
-        };
-      }
-    };
-  };
+  const handlePictureChange = async () => {
+    if (inputFile.current.files.length === 0) return; 
 
-  const handleChangeUsername = () => {
+    const file = inputFile.current.files[0];
+    const options = {
+      maxSizeMB: 1,
+      maxWidthOrHeight: 1920,
+      useWebWorker: true,
+    };
+
+    const compressedFile = await imageCompression(file, options);
+    const reader = new FileReader();
+
+    reader.readAsDataURL(compressedFile);
+    reader.onloadend = async () => {
+      const profilePicture = reader.result;
+      const response = await axios
+        .post(`${changeProfilePictureRoute}/${currentUser._id}`, {
+          profilePicture,
+          id: currentUser._id,
+        })
+      
+      const { data } = response;
+      if (!data.isSet) return;
+      
+      currentUser.profilePicture = profilePicture;
+      sessionStorage.setItem(
+        "ChitChatUser",
+        JSON.stringify(currentUser)
+      );
+      window.location.reload();
+    };
+  }
+
+  const handleProfilePictureChange = () => inputFile.current.click();
+
+  const handleChangeUsername = async () => {
     let newUsername = prompt("Enter new username");
-    if (newUsername === null) {
-      return;
-    } else if (newUsername === "") {
-      return;
-    }
+
+    if (newUsername === null) return;
+    if (newUsername === "") return;
+    
     while (
       newUsername === currentUser.username ||
       newUsername.length < 3 ||
@@ -75,24 +75,20 @@ function SettingsMenu({ isOpen, currentUser }) {
         "Username must be between 3 and 20 characters long and must be different from your current username"
       );
       newUsername = prompt("Enter new username");
-      if (newUsername === null) {
-        return;
-      } else if (newUsername === "") {
-        return;
-      }
+      if (newUsername === null) return;
+      if (newUsername === "") return;
+      
       handleChangeUsername();
     }
-    if (newUsername) {
-      axios
-        .post(`${changeUsernameRoute}/${currentUser._id}`, {
-          newUsername: newUsername,
-        })
-        .then((res) => {
-          currentUser.username = newUsername;
-          sessionStorage.setItem("ChitChatUser", JSON.stringify(currentUser));
-          window.location.reload();
-        });
-    }
+    if (!newUsername) return;
+
+    await axios.post(`${changeUsernameRoute}/${currentUser._id}`, {
+      newUsername: newUsername,
+    })
+    
+    currentUser.username = newUsername;
+    sessionStorage.setItem("ChitChatUser", JSON.stringify(currentUser));
+    window.location.reload();
   };
 
   return (
@@ -109,6 +105,7 @@ function SettingsMenu({ isOpen, currentUser }) {
               style={{ display: "none" }}
               ref={inputFile}
               accept="image/*"
+              onChange={handlePictureChange}
             />
           </li>
           <li className="dropDownMenuOption" onClick={handleChangeUsername}>

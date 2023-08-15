@@ -1,119 +1,105 @@
-import React from "react";
-import Input from "./Input";
+import React, { useRef, useEffect, useState } from "react";
 import axios from "axios";
-import { getMessagesRoute, getFollowerRoute } from "../ServerRoutes";
-import { useEffect, useState } from "react";
-import { sendMessageRoute } from "../ServerRoutes";
+
+import Input from "./Input";
+import { getMessagesRoute, sendMessageRoute } from "../ServerRoutes";
+
 import { v4 as uuidv4 } from "uuid";
-import { useRef } from "react";
+
+const SelectContact = () => ( 
+  <div className="messages noChatSelected">
+    <h2>Select a contact to start chatting</h2>
+  </div>
+)
+
+const MessageContent = ({ message }) => {
+  if (message.includes("data:image")) return <img src={message} alt="" />;
+  return<p>{message}</p>
+}
 
 const Messages = ({ selectedContact, socket }) => {
   const [messages, setMessages] = useState([]);
   const [lastMessage, setLastMessage] = useState(null);
   const scrollRef = useRef();
-  useEffect(() => {
-    const fetchMessages = async () => {
-      const currentUser = await JSON.parse(
-        sessionStorage.getItem("ChitChatUser")
-      );
-      const response = await axios.post(getMessagesRoute, {
-        sender: currentUser._id,
-        receiver: selectedContact._id,
-      });
-      setMessages(response.data);
+  
+  const handleSendMessage = async (message) => {
+    const currentUser = JSON.parse(sessionStorage.getItem("ChitChatUser"));
+    const data = {
+      sender: currentUser._id,
+      receiver: selectedContact._id,
+      message
     };
-    fetchMessages();
-  }, [selectedContact._id]);
 
-  const handleSendMessage = async (mess) => {
-    const currentUser = await JSON.parse(
-      sessionStorage.getItem("ChitChatUser")
-    );
-    const followerIdResponse = await axios
-      .get(`${getFollowerRoute}/${currentUser._id}`)
-      .catch((err) => {
-        console.log(err);
-        return null;
-      });
-    const followerId = followerIdResponse?.data?.id;
-    socket.current.emit("sendMessage", {
-      sender: currentUser._id,
-      receiver: followerId,
-      message: mess,
-    });
-    await axios.post(sendMessageRoute, {
-      sender: currentUser._id,
-      receiver: followerId,
-      message: mess,
-    });
+    socket.current.emit("sendMessage", data);
+    await axios.post(sendMessageRoute, data);
+
     setMessages([
       ...messages,
       {
         fromCurrentUser: true,
-        message: mess,
+        message: message,
       },
     ]);
   };
-
+    
   useEffect(() => {
+    const abortController = new AbortController();
     (async () => {
-      if (socket.current) {
-        socket.current.on("getMessage", (data) => {
-          setLastMessage({ fromCurrentUser: false, message: data.message });
-        });
+      const currentUser = JSON.parse(sessionStorage.getItem("ChitChatUser"));
+      const response = await axios.post(getMessagesRoute, {
+        sender: currentUser._id,
+        receiver: selectedContact._id,
+      }, { signal: abortController.signal });
+      if (response.data) {
+        setMessages(response.data);
       }
     })();
+    return () => {
+      abortController.abort();
+    }
+  }, [selectedContact._id]);
+
+  useEffect(() => {
+    if (!socket.current) return;
+    
+    const currSocket = socket.current;
+    currSocket.on("getMessage", ({ sender, message }) => {
+      if (sender !== selectedContact._id) return;
+
+      setLastMessage({ fromCurrentUser: false, message });
+    });
+    return () => {
+      currSocket.off("getMessage");
+    }
   });
 
   useEffect(() => {
-    if (lastMessage)
-      setMessages((prevMessage) => [...prevMessage, lastMessage]);
-    // if lastMessage is not null, then add it to the messages array
+    if (lastMessage) setMessages((prevMessage) => [...prevMessage, lastMessage]);
   }, [lastMessage]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const displayMessagesIfContactSelected = () => {
-    if (selectedContact.username) {
-      return (
-        <>
-          <div className="messages">
-            {messages.map((message) => {
-              return (
-                <div
-                  key={uuidv4()}
-                  ref={scrollRef}
-                  className={`message ${
-                    message.fromCurrentUser ? "owner" : "receiver "
-                  }`}
-                >
-                  <div className="messageContent">
-                    {message.message.includes("data:image") ? (
-                      <img src={message.message} alt="" />
-                    ) : (
-                      <p>{message.message}</p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <Input handleSendMessage={handleSendMessage} />
-        </>
-      );
-    } else {
-      return (
-        <>
-          <div className="messages noChatSelected">
-            <h2>Select a contact to start chatting</h2>
-          </div>
-        </>
-      );
-    }
-  };
+  if (!selectedContact.username) return <SelectContact />;
 
-  return <>{displayMessagesIfContactSelected()}</>;
+  return <>
+    <div className="messages">
+      {messages.map(({ fromCurrentUser, message }) => {
+        return (
+          <div
+            key={uuidv4()}
+            ref={scrollRef}
+            className={`message ${fromCurrentUser ? "owner" : "receiver "}`}
+          >
+            <div className="messageContent">
+              <MessageContent message={message} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
+    <Input handleSendMessage={handleSendMessage} />
+  </>;
 };
 export default Messages;

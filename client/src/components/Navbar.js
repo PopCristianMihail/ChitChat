@@ -4,8 +4,8 @@ import SettingsMenu from "./SettingsMenu";
 import settings from "../images/settings.png";
 
 const Navbar = ({ currentUser }) => {
-  const [isOpen, setIsOpen] = useState(false);
   const inputFile = useRef(null);
+  const [isOpen, setIsOpen] = useState(false);
   const [clickedProfilePicture, setClickedProfilePicture] = useState(false);
 
   const handleSettingsClick = () => {
