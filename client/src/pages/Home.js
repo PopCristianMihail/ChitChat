@@ -63,6 +63,8 @@ const Home = () => {
   }, [currentUser]);
 
   useEffect(() => {
+    if (!currentUser._id) return;
+
     (async () => {
       const response = await axios.get(`${getUsersRoute}/${currentUser._id}`);
       setContacts(response.data);
