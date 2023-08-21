@@ -134,3 +134,14 @@ module.exports.changeUsername = async (req, res) => {
     console.log(err);
   }
 };
+
+module.exports.deleteAccount = async (req,res) => {
+  const {id:userId} = req.params;
+  try {
+    const user = await User.findByIdAndDelete(userId);
+    return res.json({status:true});
+  } catch (err) {
+    console.log(err);
+  }
+}
+

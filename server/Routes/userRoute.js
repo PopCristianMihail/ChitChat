@@ -11,5 +11,6 @@ router.post(
   authenticationRoute.changeProfilePicture
 );
 router.post("/changeUsername/:id", authenticationRoute.changeUsername);
+router.delete("/deleteAccount/:id", authenticationRoute.deleteAccount);
 
 module.exports = router;

@@ -4,6 +4,7 @@ import {
   logOutRoute,
   changeProfilePictureRoute,
   changeUsernameRoute,
+  deleteAccountRoute,
 } from "../ServerRoutes";
 import imageCompression from "browser-image-compression";
 
@@ -91,6 +92,16 @@ function SettingsMenu({ isOpen, currentUser }) {
     window.location.reload();
   };
 
+  const handleDeleteAccount = async () => {
+    const answer = window.confirm("Are you sure you want to delete your account?");
+    if (!answer) return;
+    
+    const response = await axios.delete(`${deleteAccountRoute}/${currentUser._id}`);
+    if (response.data.status) {
+      sessionStorage.removeItem("ChitChatUser");
+      window.location.reload();
+    }
+  }
   return (
     <>
       <div className={`dropDownMenuContainer ${isOpen ? "active" : ""}`}>
@@ -120,6 +131,9 @@ function SettingsMenu({ isOpen, currentUser }) {
               <span className="loader"></span>
             </li>
           )}
+          <li className="dropDownMenuOption" onClick={handleDeleteAccount}>
+            Delete Account
+          </li>
         </ul>
       </div>
     </>

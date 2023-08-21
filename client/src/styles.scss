@@ -326,7 +326,7 @@ html {
             }
           }
           .dropDownMenuContainer.active {
-            height: 15rem;
+            height: 18rem;
             transition: height 0.3s ease;
           }
           h3 {
@@ -353,61 +353,6 @@ html {
           img.rotate:hover {
             cursor: pointer;
             opacity: 0.8;
-          }
-        }
-      }
-      .search {
-        border-bottom: 1px solid #596768;
-        .searchForm {
-          padding: 10px;
-          input {
-            background-color: transparent;
-            border: none;
-            color: #f5f5f5;
-            outline: none;
-            width: 100%;
-          }
-        }
-        .userChat {
-          padding: 10px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          color: #f5f5f5;
-          cursor: pointer;
-          background: linear-gradient(to right, #3a4f506c 50%, transparent 50%);
-          background-size: 200% 100%;
-          background-position: right bottom;
-          transition: all 0.3s ease-out;
-          &:hover {
-            background-position: left bottom;
-          }
-          img {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            object-fit: fill;
-          }
-          .userChatInfo {
-            span {
-              font-size: 14px;
-              font-weight: 600;
-            }
-            .online {
-              height: 5px;
-              width: 5px;
-              background-color: #00ff00;
-              border-radius: 50%;
-              margin-left: 20px;
-              display: inline-block;
-            }
-            .notOnline {
-              height: 0px;
-              width: 0px;
-              background-color: #ff0000;
-              border-radius: 50%;
-              margin-left: 5px;
-            }
           }
         }
       }
@@ -511,6 +456,7 @@ html {
           height: 50px;
           border-radius: 10px;
           object-fit: fill;
+          cursor: pointer;
         }
       }
       .chatInfo.noChatSelected {

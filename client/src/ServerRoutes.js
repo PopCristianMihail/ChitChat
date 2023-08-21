@@ -9,3 +9,4 @@ export const sendMessageRoute = `${host}/server/messages/sendMessage`;
 export const getMessagesRoute = `${host}/server/messages/getMessages`;
 export const deleteConversationRoute = `${host}/server/messages/deleteConversation`;
 export const changeUsernameRoute = `${host}/server/authentication/changeUsername`;
+export const deleteAccountRoute = `${host}/server/authentication/deleteAccount`;
