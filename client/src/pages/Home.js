@@ -12,21 +12,21 @@ import BinImage from "../images/bin.png";
 
 import "../styles.scss";
 
-const ChatInfo = ({ username, profilePicture, onDeleteConversation }) => {
-  if (!username) return <div className="chatInfo noChatSelected" />;
+// const ChatInfo = ({ username, profilePicture, onDeleteConversation }) => {
+//   if (!username) return <div className="chatInfo noChatSelected" />;
 
-  return (
-    <div className="chatInfo">
-      <span>
-        <img src={profilePicture} alt="" />
-        {username}
-      </span>
-      <div className="chatIcons">
-        <img src={BinImage} alt="" onClick={onDeleteConversation} />
-      </div>
-    </div>
-  )
-}
+//   return (
+//     <div className="chatInfo">
+//       <span>
+//         <img src={profilePicture} alt="" />
+//         {username}
+//       </span>
+//       <div className="chatIcons">
+//         <img src={BinImage} alt="" onClick={onDeleteConversation} />
+//       </div>
+//     </div>
+//   )
+// }
 
 const Home = () => {
   const navigate = useNavigate();
@@ -36,6 +36,7 @@ const Home = () => {
   const [contacts, setContacts] = useState([]);
   const [selectedContact, setSelectedContact] = useState({});
   const [currentUser, setCurrentUser] = useState({});
+  const [pictureClicked, setPictureClicked] = useState(false);
 
   const handleChange = async (chat) => {
     setSelectedContact(chat);
@@ -52,6 +53,12 @@ const Home = () => {
 
     if (response.data.status) setSelectedContact({});
   };
+
+  const handlePictureClick = () => {
+    setPictureClicked(!pictureClicked);
+    console.log(pictureClicked);
+  }
+
 
   useEffect(() => {
     if (!currentUser) return;
@@ -93,11 +100,22 @@ const Home = () => {
         <div
           className={`chat ${selectedContact.username ? "" : "noChatSelected"}`}
         >
-          <ChatInfo
-            username={selectedContact.username}
-            profilePicture={selectedContact.profilePicture}
-            onDeleteConversation={handleDeleteConversation}
-          />
+        <>
+        {selectedContact.username ? (
+          <div className="chatInfo">
+            <span>
+              <img className={`${pictureClicked ? "clickedSelectedContactPicture" : ""}`} src={selectedContact.profilePicture} alt="" onClick={handlePictureClick}/>
+                {selectedContact.username}
+            </span>
+            <div className="chatIcons">
+              <img src={BinImage} alt="" onClick={handleDeleteConversation} />
+            </div>
+          </div>
+        ) : (
+          <div className="chatInfo noChatSelected" />
+        )
+        }
+        </>
           <Messages
             selectedContact={selectedContact}
             socket={socket}

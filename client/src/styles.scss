@@ -454,9 +454,22 @@ html {
         img {
           width: 50px;
           height: 50px;
+          transition: 0.3s;
           border-radius: 10px;
           object-fit: fill;
           cursor: pointer;
+        }
+        img.clickedSelectedContactPicture{
+          position: absolute;
+          margin: 10px 10px 10px 10px;
+          border-radius: 10px;
+          object-fit: cover;
+          opacity: 1;
+          top: 3vh;
+          left: 21vw;
+          height: 80vh;
+          width: 50vw;
+          z-index: 2;
         }
       }
       .chatInfo.noChatSelected {
@@ -514,7 +527,6 @@ html {
             }
             img {
               width: 20%;
-              cursor: pointer;
             }
           }
           &.owner {
@@ -533,6 +545,7 @@ html {
                 width: 20% !important;
                 border-radius: 10px 10px 0px 10px;
                 margin-left: 80%;
+                transition: 0.3s;
               }
             }
           }
@@ -552,6 +565,7 @@ html {
                 width: 20% !important;
                 border-radius: 10px 10px 10px 0px;
                 margin-right: 80%;
+                transition: 0.3s;
               }
             }
           }

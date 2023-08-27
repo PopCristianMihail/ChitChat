@@ -10,12 +10,13 @@ const SelectContact = () => (
   <div className="messages noChatSelected">
     <h2>Select a contact to start chatting</h2>
   </div>
-)
+);
 
 const MessageContent = ({ message }) => {
   if (message.includes("data:image")) return <img src={message} alt="" />;
   return<p>{message}</p>
-}
+};
+
 
 const Messages = ({ selectedContact, socket }) => {
   const [messages, setMessages] = useState([]);
@@ -29,10 +30,10 @@ const Messages = ({ selectedContact, socket }) => {
       receiver: selectedContact._id,
       message
     };
-
+    
     socket.current.emit("sendMessage", data);
     await axios.post(sendMessageRoute, data);
-
+    
     setMessages([
       ...messages,
       {
@@ -41,48 +42,44 @@ const Messages = ({ selectedContact, socket }) => {
       },
     ]);
   };
-    
+  
   useEffect(() => {
-    const abortController = new AbortController();
     (async () => {
       const currentUser = JSON.parse(sessionStorage.getItem("ChitChatUser"));
       const response = await axios.post(getMessagesRoute, {
         sender: currentUser._id,
         receiver: selectedContact._id,
-      }, { signal: abortController.signal });
+      });
       if (response.data) {
         setMessages(response.data);
       }
     })();
-    return () => {
-      abortController.abort();
-    }
   }, [selectedContact._id]);
-
+  
   useEffect(() => {
     if (!socket.current) return;
     
     const currSocket = socket.current;
     currSocket.on("getMessage", ({ sender, message }) => {
       if (sender !== selectedContact._id) return;
-
+      
       setLastMessage({ fromCurrentUser: false, message });
     });
     return () => {
       currSocket.off("getMessage");
     }
   });
-
+  
   useEffect(() => {
     if (lastMessage) setMessages((prevMessage) => [...prevMessage, lastMessage]);
   }, [lastMessage]);
-
+  
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
+  
   if (!selectedContact.username) return <SelectContact />;
-
+  
   return <>
     <div className="messages">
       {messages.map(({ fromCurrentUser, message }) => {
