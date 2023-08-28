@@ -75,7 +75,7 @@ const Messages = ({ selectedContact, socket }) => {
   }, [lastMessage]);
   
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" }); //TODO: Check this function for lag when landing on home page
   }, [messages]);
   
   if (!selectedContact.username) return <SelectContact />;

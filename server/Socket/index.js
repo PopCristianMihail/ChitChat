@@ -18,7 +18,6 @@ const createSocketOperations = () => {
             userPool.delete(userId);
         },
         sendMessage: socket => ({ sender, receiver, message }) => {
-            console.log({ sender, receiver, message });
             if (!sender || !receiver || !message) return;
 
             const receiverSocketId = userPool.get(receiver);
