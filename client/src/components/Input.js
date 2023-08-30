@@ -5,6 +5,7 @@ import SendPicture from "../images/image.png";
 import Send from "../images/sendArrow.png";
 import "../styles.scss";
 import imageCompression from "browser-image-compression";
+import EmojiPicker from "emoji-picker-react";
 
 const Input = ({ handleSendMessage }) => {
   const [message, setMessage] = useState("");
@@ -12,6 +13,12 @@ const Input = ({ handleSendMessage }) => {
   const inputPicture = useRef(null);
 
   const handleChange = (e) => setMessage(e.target.value);
+
+  const handleEmojiPicker = () => setShowPicker(!showPicker);
+
+  // const handleEmojiClick = (e, emojiObject) => {
+  //   setMessage(message + emojiObject.emoji);
+  // };
 
   const handleSend = (e) => {
     e.preventDefault();
@@ -22,11 +29,6 @@ const Input = ({ handleSendMessage }) => {
 
   const handleEnterKeyPressed = (e) => {
     if (e.key === "Enter") handleSend(e);
-  };
-
-  const handlePickerClick = () => {
-    setShowPicker(!showPicker);
-    console.log(showPicker);
   };
 
   const handlePictureChange = async () => {
@@ -55,12 +57,21 @@ const Input = ({ handleSendMessage }) => {
         onChange={handleChange}
         onKeyDown={(e) => handleEnterKeyPressed(e)}
       />
+      <>
+      {
+        showPicker ? (
+          <div className="emoji">
+          <EmojiPicker height={450} width={450}  theme="dark" onEmojiClick={(emojiObject) => setMessage((prevMessage) => prevMessage + emojiObject.emoji) }/>
+        </div>
+        ) : null
+      }
+      </>
       <div className="send">
         <img
           className="sendEmoji"
           src={Emoji}
           alt=""
-          onClick={handlePickerClick}
+          onClick={handleEmojiPicker}
         />
         <img
           className="sendEmoji"

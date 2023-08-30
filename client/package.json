@@ -9,7 +9,7 @@
     "axios": "^1.4.0",
     "browser-image-compression": "^2.0.2",
     "buffer": "^6.0.3",
-    "emoji-picker-react": "^4.4.9",
+    "emoji-picker-react": "^4.4.12",
     "react": "^18.2.0",
     "react-avatar-edit": "^1.2.0",
     "react-dom": "^18.2.0",
