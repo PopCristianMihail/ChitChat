@@ -12,22 +12,6 @@ import BinImage from "../images/bin.png";
 
 import "../styles.scss";
 
-// const ChatInfo = ({ username, profilePicture, onDeleteConversation }) => {
-//   if (!username) return <div className="chatInfo noChatSelected" />;
-
-//   return (
-//     <div className="chatInfo">
-//       <span>
-//         <img src={profilePicture} alt="" />
-//         {username}
-//       </span>
-//       <div className="chatIcons">
-//         <img src={BinImage} alt="" onClick={onDeleteConversation} />
-//       </div>
-//     </div>
-//   )
-// }
-
 const Home = () => {
   const navigate = useNavigate();
 
@@ -56,9 +40,7 @@ const Home = () => {
 
   const handlePictureClick = () => {
     setPictureClicked(!pictureClicked);
-    console.log(pictureClicked);
   }
-
 
   useEffect(() => {
     if (!currentUser) return;

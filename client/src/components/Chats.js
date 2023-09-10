@@ -24,24 +24,9 @@ const Chats = ({ contacts, changeCurrentSelectedContact }) => {
     changeCurrentSelectedContact(contact);
   };
 
-  // const escPressed = (e) => {
-  //   if (e.keyCode === 27) {
-  //     handleContactChange({}, {});
-  //     setCurrentContact(undefined);
-  //   }
-  // };
-
   useEffect(() => {
     if (contacts.length > 0) setIsLoading(false);
   }, [contacts]);
-
-  // useEffect(() => {
-  //   document.addEventListener("keydown", escPressed, false);
-  //   return () => {
-  //     document.removeEventListener("keydown", escPressed, false);
-  //   };
-  // }, [escPressed]);
-
 
   return (
     <Suspense loading={isLoading} fallback={() => (

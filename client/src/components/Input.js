@@ -1,6 +1,7 @@
 import React from "react";
 import { useState, useRef } from "react";
-import Emoji from "../images/emoji.png";
+//import Emoji from "../images/emoji.png";
+import Emoji from "../images/curious.png";
 import SendPicture from "../images/image.png";
 import Send from "../images/sendArrow.png";
 import "../styles.scss";
@@ -15,10 +16,6 @@ const Input = ({ handleSendMessage }) => {
   const handleChange = (e) => setMessage(e.target.value);
 
   const handleEmojiPicker = () => setShowPicker(!showPicker);
-
-  // const handleEmojiClick = (e, emojiObject) => {
-  //   setMessage(message + emojiObject.emoji);
-  // };
 
   const handleSend = (e) => {
     e.preventDefault();
